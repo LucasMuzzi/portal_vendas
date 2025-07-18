@@ -143,14 +143,14 @@
       </div>
     </div>
 
-    <div class="card shadow-sm">
+    <div class="card shadow-sm" id="resumo-venda">
       <div class="card-body">
         <div class="d-flex justify-content-between h4">
           <strong>Total:</strong>
-          <strong>R$ 0.00</strong>
+          <strong id="total-venda">R$ 0.00</strong>
         </div>
         <div class="d-grid mt-3">
-          <button class="btn btn-success btn-lg" disabled>Finalizar Venda</button>
+          <button class="btn btn-success btn-lg" id="btn-finalizar" disabled>Finalizar Venda</button>
         </div>
       </div>
     </div>
@@ -167,8 +167,8 @@
   const listaItensContainer = document.getElementById("lista-itens");
   const corpoTabela = document.getElementById("corpo-tabela");
 
-  const totalVendaEl = document.querySelector("#resumo-total strong");
-  const botaoFinalizar = document.querySelector("#resumo-total button");
+  const totalVenda = document.getElementById("total-venda");
+  const botaoFinalizar = document.getElementById("btn-finalizar");
 
   const cepInput = document.getElementById("cep");
   const ruaInput = document.getElementById("rua");
@@ -178,14 +178,27 @@
 
   let produtosAdicionados = [];
 
-  function atualizarTotalVenda() {
-    const total = produtosAdicionados.reduce((soma, produto) => {
-      return soma + produto.preco * produto.quantidade;
-    }, 0);
+  function atualizarResumoVenda() {
+    let total = 0;
 
-    totalVendaEl.textContent = total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    produtosAdicionados.forEach((produto) => {
+      total += produto.preco * produto.quantidade;
+    });
 
-    botaoFinalizar.disabled = total === 0;
+    totalVenda.textContent = total.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+
+    botaoFinalizar.disabled = produtosAdicionados.length === 0;
+  }
+
+  function limparCamposProduto() {
+    inputBusca.value = "";
+    inputQuantidade.value = 1;
+    delete inputBusca.dataset.produtoId;
+    delete inputBusca.dataset.produtoPreco;
+    delete inputBusca.dataset.produtoImagem;
   }
 
   function atualizarVisibilidadeLista() {
@@ -223,7 +236,7 @@
       produtosAdicionados = produtosAdicionados.filter((p) => p.id !== produto.id);
       tr.remove();
       atualizarVisibilidadeLista();
-      atualizarTotalVenda();
+      atualizarResumoVenda();
     });
 
     corpoTabela.appendChild(tr);
@@ -292,12 +305,8 @@
 
     adicionarLinhaNaTabela(produto);
     atualizarVisibilidadeLista();
-    atualizarTotalVenda();
-
-    inputBusca.value = "";
-    inputQuantidade.value = 1;
-    delete inputBusca.dataset.produtoId;
-    delete inputBusca.dataset.produtoPreco;
+    limparCamposProduto();
+    atualizarResumoVenda();
   });
 
   cepInput.addEventListener("blur", function () {
@@ -336,6 +345,5 @@
   });
 
   atualizarVisibilidadeLista();
-  atualizarTotalVenda();
 </script>
 {% endblock %}
