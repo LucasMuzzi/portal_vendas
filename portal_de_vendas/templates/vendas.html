@@ -1,13 +1,13 @@
 {% extends "base.html" %} {% block title %}SEMEQ - Nova Venda{% endblock %} {% block content %} {% load static %}
 <nav class="navbar bg-body-tertiary mb-4">
   <div class="container d-flex justify-content-between align-items-center">
-    <a class="navbar-brand" href="#">
+    <a class="navbar-brand" href="https://semeq.com/pt/home/" target="_blank">
       <img src="{% static 'images/semeq_logo_branco.png' %}" alt="Logo Semeq" width="100" />
     </a>
 
     <form action="{% url 'logout' %}" method="post" class="d-inline">
       {% csrf_token %}
-      <button type="submit" class="btn btn-outline-danger btn-sm">Sair</button>
+      <button type="submit" class="btn btn-danger btn-sm">Sair</button>
     </form>
   </div>
 </nav>
@@ -20,24 +20,12 @@
       </div>
       <div class="card-body">
         <div class="input-group">
-          <span class="input-group-text">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="currentColor"
-              class="bi bi-search"
-              viewBox="0 0 16 16"
-            >
-              <path
-                d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"
-              />
-            </svg>
-          </span>
-          <input type="text" class="form-control" placeholder="Digite o nome do produto..." />
-          <input type="number" class="form-control" value="1" style="max-width: 80px" />
-          <button class="btn btn-primary">Adicionar</button>
+          <input type="text" class="form-control" placeholder="Digite o nome do produto..." id="input-busca" />
+          <input type="number" class="form-control" value="1" style="max-width: 80px" id="input-quantidade" />
+          <button class="btn btn-primary" id="btn-adicionar">Adicionar</button>
         </div>
+
+        <div id="search-results" class="list-group mt-2"></div>
       </div>
     </div>
 
@@ -46,7 +34,7 @@
         <h5 class="card-title mb-0">Itens da Venda</h5>
       </div>
       <div class="card-body text-center text-muted" style="min-height: 250px">
-        <div class="d-flex flex-column justify-content-center h-100">
+        <div id="estado-vazio" class="flex-column justify-content-center h-100">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="48"
@@ -54,12 +42,22 @@
             fill="currentColor"
             class="bi bi-cart3 mx-auto"
             viewBox="0 0 16 16"
-          >
-            <path
-              d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .49.598l-1 5a.5.5 0 0 1-.465.401l-9.397.472L4.415 11H13a.5.5 0 0 1 0 1H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l.84 4.479 9.144-.459L13.89 4H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"
-            />
-          </svg>
+          ></svg>
           <p class="mt-3">Nenhum produto adicionado</p>
+        </div>
+
+        <div id="lista-itens" style="display: none" class="text-start">
+          <table class="table table-bordered mt-3">
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Qtd</th>
+                <th>Preço</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="corpo-tabela"></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -147,12 +145,6 @@
 
     <div class="card shadow-sm">
       <div class="card-body">
-        <h5 class="card-title mb-3">Resumo da Venda</h5>
-        <div class="d-flex justify-content-between">
-          <span>Subtotal:</span>
-          <strong>R$ 0.00</strong>
-        </div>
-        <hr />
         <div class="d-flex justify-content-between h4">
           <strong>Total:</strong>
           <strong>R$ 0.00</strong>
@@ -166,12 +158,147 @@
 </div>
 
 <script>
-  //Criei os inputs para validar os campos do CEP
+  const inputBusca = document.getElementById("input-busca");
+  const resultadoContainer = document.getElementById("search-results");
+  const inputQuantidade = document.getElementById("input-quantidade");
+  const botaoAdicionar = document.getElementById("btn-adicionar");
+
+  const estadoVazio = document.getElementById("estado-vazio");
+  const listaItensContainer = document.getElementById("lista-itens");
+  const corpoTabela = document.getElementById("corpo-tabela");
+
+  const totalVendaEl = document.querySelector("#resumo-total strong");
+  const botaoFinalizar = document.querySelector("#resumo-total button");
+
   const cepInput = document.getElementById("cep");
   const ruaInput = document.getElementById("rua");
   const bairroInput = document.getElementById("bairro");
   const cidadeInput = document.getElementById("cidade");
   const estadoInput = document.getElementById("estado");
+
+  let produtosAdicionados = [];
+
+  function atualizarTotalVenda() {
+    const total = produtosAdicionados.reduce((soma, produto) => {
+      return soma + produto.preco * produto.quantidade;
+    }, 0);
+
+    totalVendaEl.textContent = total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+    botaoFinalizar.disabled = total === 0;
+  }
+
+  function atualizarVisibilidadeLista() {
+    const temItens = produtosAdicionados.length > 0;
+
+    estadoVazio.classList.toggle("d-none", temItens);
+    estadoVazio.classList.toggle("d-flex", !temItens);
+
+    listaItensContainer.style.display = temItens ? "block" : "none";
+  }
+
+  function adicionarLinhaNaTabela(produto) {
+    const tr = document.createElement("tr");
+    tr.dataset.produtoId = produto.id;
+
+    const subtotal = produto.preco * produto.quantidade;
+
+    tr.innerHTML = `
+                    <td>
+                        <div class="d-flex align-items-center">
+                        <img src="${produto.imagem_url}" alt="${
+      produto.titulo
+    }" style="width: 40px; height: auto; margin-right: 10px;">
+                        ${produto.titulo}
+                        </div>
+                    </td>
+                    <td>${produto.quantidade}</td>
+                    <td>${subtotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm btn-remover">Remover</button>
+                    </td>
+                    `;
+
+    tr.querySelector(".btn-remover").addEventListener("click", () => {
+      produtosAdicionados = produtosAdicionados.filter((p) => p.id !== produto.id);
+      tr.remove();
+      atualizarVisibilidadeLista();
+      atualizarTotalVenda();
+    });
+
+    corpoTabela.appendChild(tr);
+  }
+
+  inputBusca.addEventListener("keyup", function () {
+    const termoPesquisa = inputBusca.value;
+    if (termoPesquisa.length < 2) {
+      resultadoContainer.innerHTML = "";
+      return;
+    }
+    fetch(`/buscar-produto/?term=${termoPesquisa}`)
+      .then((response) => response.json())
+      .then((data) => {
+        resultadoContainer.innerHTML = "";
+        data.forEach((produto) => {
+          const link = document.createElement("a");
+          link.href = "#";
+          link.className = "list-group-item list-group-item-action";
+          link.innerHTML = `
+                            <div class="d-flex align-items-center">
+                                <img src="${produto.imagem_url}" alt="${
+            produto.titulo
+          }" style="width: 50px; height: auto; margin-right: 10px;">
+                                <div>
+                                <div><strong>${produto.titulo}</strong></div>
+                                <div>${parseFloat(produto.preco).toLocaleString("pt-BR", {
+                                  style: "currency",
+                                  currency: "BRL",
+                                })}</div>
+                                </div>
+                            </div>
+                            `;
+          link.dataset.produtoId = produto.id;
+          link.dataset.produtoTitulo = produto.titulo;
+          link.dataset.produtoPreco = produto.preco;
+          link.dataset.produtoImagem = produto.imagem_url;
+          link.addEventListener("click", function (e) {
+            e.preventDefault();
+            inputBusca.value = this.dataset.produtoTitulo;
+            inputBusca.dataset.produtoId = this.dataset.produtoId;
+            inputBusca.dataset.produtoPreco = this.dataset.produtoPreco;
+            inputBusca.dataset.produtoImagem = this.dataset.produtoImagem;
+
+            resultadoContainer.innerHTML = "";
+          });
+          resultadoContainer.appendChild(link);
+        });
+      });
+  });
+
+  botaoAdicionar.addEventListener("click", function () {
+    const produtoId = inputBusca.dataset.produtoId;
+    const titulo = inputBusca.value;
+    const preco = parseFloat(inputBusca.dataset.produtoPreco);
+    const quantidade = parseInt(inputQuantidade.value);
+
+    if (!produtoId || isNaN(preco) || isNaN(quantidade) || quantidade <= 0) {
+      alert("Selecione um produto válido e informe a quantidade.");
+      return;
+    }
+
+    const imagemUrl = inputBusca.dataset.produtoImagem;
+    const produto = { id: produtoId, titulo, preco, quantidade, imagem_url: imagemUrl };
+    produtosAdicionados.push(produto);
+
+    adicionarLinhaNaTabela(produto);
+    atualizarVisibilidadeLista();
+    atualizarTotalVenda();
+
+    inputBusca.value = "";
+    inputQuantidade.value = 1;
+    delete inputBusca.dataset.produtoId;
+    delete inputBusca.dataset.produtoPreco;
+  });
 
   cepInput.addEventListener("blur", function () {
     const cep = cepInput.value.replace(/\D/g, "");
@@ -184,6 +311,7 @@
 
       fetch(`https://viacep.com.br/ws/${cep}/json/`)
         .then((response) => response.json())
+
         .then((data) => {
           if (data.erro) {
             alert("CEP não encontrado. Por favor, verifique.");
@@ -198,12 +326,16 @@
             estadoInput.value = data.uf;
           }
         })
+
         .catch((error) => {
           console.error("Erro ao buscar o CEP:", error);
+
           alert("Não foi possível consultar o CEP. Verifique sua conexão.");
         });
     }
   });
-</script>
 
+  atualizarVisibilidadeLista();
+  atualizarTotalVenda();
+</script>
 {% endblock %}
