@@ -1,25 +1,57 @@
-{% extends "base.html" %} {% block title %}Login{% endblock %} {% block content %} {% load static %}
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-4">
-      <img src="{% static 'images/semeq_logo.png' %}" alt="logo-semeq" class="d-block mx-auto mb-4" width="150" />
+{% extends "base.html" %} {% block title %}SEMEQ - Login{% endblock %} {% block content %} {% load static %}
 
-    
-      <form method="post">
-        {% csrf_token %}
-        <div class="form-group mb-3">
-          <label for="username">Usuário</label>
-          <input type="text" name="username" class="form-control" required autofocus />
+<div class="login-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-5 col-lg-4">
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-4">
+            <div class="text-center mb-4">
+              <img src="{% static 'images/semeq_logo.png' %}" alt="logo-semeq" width="120" />
+            </div>
+
+            <h4 class="card-title text-center mb-1">Bem-vindo!</h4>
+            <p class="text-center text-muted small mb-4">Acesse sua conta para continuar.</p>
+
+            <form method="post">
+              {% csrf_token %}
+
+              <div class="form-floating mb-3">
+                <input
+                  type="text"
+                  name="username"
+                  class="form-control"
+                  id="floatingUsername"
+                  placeholder="seu-usuario"
+                  required
+                  autofocus
+                />
+                <label for="floatingUsername">Usuário</label>
+              </div>
+
+              <div class="form-floating mb-3">
+                <input
+                  type="password"
+                  name="password"
+                  class="form-control"
+                  id="floatingPassword"
+                  placeholder="sua-senha"
+                  required
+                />
+                <label for="floatingPassword">Senha</label>
+              </div>
+
+              {% if form.errors %}
+              <div class="alert alert-danger py-2 small">Usuário ou senha inválidos.</div>
+              {% endif %}
+
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
+              </div>
+            </form>
+          </div>
         </div>
-        <div class="form-group mb-4">
-          <label for="password">Senha</label>
-          <input type="password" name="password" class="form-control" required />
-        </div>
-        {% if form.errors %}
-        <div class="alert alert-danger">Usuário ou senha inválidos.</div>
-        {% endif %}
-        <button type="submit" class="btn btn-primary w-100">Entrar</button>
-      </form>
+      </div>
     </div>
   </div>
 </div>
