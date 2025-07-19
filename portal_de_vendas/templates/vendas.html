@@ -41,7 +41,7 @@
         <div class="card-body">
           <div class="input-group">
             <input type="text" class="form-control" placeholder="Digite o nome do produto..." id="input-busca" />
-            <input type="number" class="form-control" value="1" style="max-width: 80px" id="input-quantidade" />
+            <input type="number" class="form-control" value="1" min="1" style="max-width: 80px" id="input-quantidade" />
             <button type="button" class="btn btn-primary" id="btn-adicionar">Adicionar</button>
           </div>
 
@@ -250,7 +250,7 @@
 
   function adicionarLinhaNaTabela(produto) {
     const tr = document.createElement("tr");
-    tr.dataset.produtoId = produto.id;
+    tr.dataset.uid = produto.uid;
 
     const subtotal = produto.preco * produto.quantidade;
 
@@ -272,7 +272,7 @@
                     `;
 
     tr.querySelector(".btn-remover").addEventListener("click", () => {
-      produtosAdicionados = produtosAdicionados.filter((p) => p.id !== produto.id);
+      produtosAdicionados = produtosAdicionados.filter((p) => p.uid !== produto.uid);
       tr.remove();
       atualizarVisibilidadeLista();
       atualizarResumoVenda();
@@ -343,7 +343,8 @@
     }
 
     const imagemUrl = inputBusca.dataset.produtoImagem;
-    const produto = { id: produtoId, titulo, preco, quantidade, imagem_url: imagemUrl, fornecedor };
+    const itemId = `${produtoId}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const produto = { uid: itemId, id: produtoId, titulo, preco, quantidade, imagem_url: imagemUrl, fornecedor };
     produtosAdicionados.push(produto);
 
     adicionarLinhaNaTabela(produto);
