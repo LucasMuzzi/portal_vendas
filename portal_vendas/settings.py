@@ -66,9 +66,9 @@ WSGI_APPLICATION = "portal_vendas.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "portal_vendas",
-        "USER": "postgres",
-        "PASSWORD": "123",
+        "NAME": "",
+        "USER": "",
+        "PASSWORD": "",
         "HOST": "localhost",
         "PORT": "5432",
     }
@@ -129,6 +129,7 @@ LOGOUT_REDIRECT_URL = "/"
 MEDIA_URL = "/portal_de_vendas/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "portal_de_vendas/media")
 
+## DEIXEI MINHA URI DO ATLAS AQUI, CASO NÃO TENHA CONFIGURADO AINDA.. ESSA URI SÓ USO PARA TESTES NO MONGO
 MONGO_URI = "mongodb+srv://lucasmuzzi:foRlSTnXug4e0fEd@cluster0.1vizb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 MONGO_DATABASE_NAME = "historico_vendas"
 

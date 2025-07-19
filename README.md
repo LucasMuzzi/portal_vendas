@@ -67,7 +67,7 @@ pip install -r requirements.txt
 **PostgreSQL:**
 
 1.  Crie um novo banco de dados no PostgreSQL (ex: `portal_vendas_db`).
-2.  Renomeie o arquivo `.env.example` (se houver) para `.env` e configure as credenciais do seu banco de dados. Caso contrário, edite diretamente o `settings.py` com seus dados:
+2.  Edite diretamente o `settings.py` com seus dados:
 
     ```python
     # portal_vendas/settings.py
