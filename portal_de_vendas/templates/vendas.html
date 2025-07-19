@@ -11,152 +11,161 @@
     </form>
   </div>
 </nav>
-
-<div class="row g-4 p-3">
-  <div class="col-lg-7">
-    <div class="card shadow-sm mb-4">
-      <div class="card-header">
-        <h5 class="card-title mb-0">Buscar Produto</h5>
-      </div>
-      <div class="card-body">
-        <div class="input-group">
-          <input type="text" class="form-control" placeholder="Digite o nome do produto..." id="input-busca" />
-          <input type="number" class="form-control" value="1" style="max-width: 80px" id="input-quantidade" />
-          <button class="btn btn-primary" id="btn-adicionar">Adicionar</button>
+<form id="form-venda" method="POST" action="{% url 'registrar_venda' %}" novalidate>
+  {% csrf_token %}
+  <div class="row g-4 p-3">
+    <div class="col-lg-7">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Buscar Produto</h5>
         </div>
-
-        <div id="search-results" class="list-group mt-2"></div>
-      </div>
-    </div>
-
-    <div class="card shadow-sm">
-      <div class="card-header">
-        <h5 class="card-title mb-0">Itens da Venda</h5>
-      </div>
-      <div class="card-body text-center text-muted" style="min-height: 250px">
-        <div id="estado-vazio" class="flex-column justify-content-center h-100">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="48"
-            height="48"
-            fill="currentColor"
-            class="bi bi-cart3 mx-auto"
-            viewBox="0 0 16 16"
-          ></svg>
-          <p class="mt-3">Nenhum produto adicionado</p>
-        </div>
-
-        <div id="lista-itens" style="display: none" class="text-start">
-          <table class="table table-bordered mt-3">
-            <thead>
-              <tr>
-                <th>Produto</th>
-                <th>Qtd</th>
-                <th>Preço</th>
-                <th>Ação</th>
-              </tr>
-            </thead>
-            <tbody id="corpo-tabela"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-lg-5">
-    <div class="card shadow-sm mb-4">
-      <div class="card-header">
-        <h5 class="card-title mb-0">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            class="bi bi-person"
-            viewBox="0 0 16 16"
-          >
-            <path
-              d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"
-            />
-          </svg>
-          Dados do Cliente
-        </h5>
-      </div>
-      <div class="card-body">
-        <div class="mb-3">
-          <label for="nomeCliente" class="form-label">Nome do Cliente *</label>
-          <input type="text" class="form-control" id="nomeCliente" placeholder="Digite o nome do cliente" />
-        </div>
-        <div>
-          <label for="dataVenda" class="form-label">Data da Venda *</label>
-          <input type="date" class="form-control" id="dataVenda" value="{{ "2025-07-18" }}">
-        </div>
-      </div>
-    </div>
-
-    <div class="card shadow-sm mb-4">
-      <div class="card-header">
-        <h5 class="card-title mb-0">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            class="bi bi-geo-alt"
-            viewBox="0 0 16 16"
-          >
-            <path
-              d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"
-            />
-            <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-          </svg>
-          Endereço de Entrega
-        </h5>
-      </div>
-      <div class="card-body">
-        <div class="mb-3">
-          <label for="cep" class="form-label">CEP *</label>
-          <input type="text" class="form-control" id="cep" placeholder="Somente números" maxlength="8" />
-        </div>
-        <div class="mb-3">
-          <label for="rua" class="form-label">Rua</label>
-          <input type="text" class="form-control" id="rua" placeholder="Rua, Avenida..." />
-        </div>
-        <div class="mb-3">
-          <label for="numero" class="form-label">Número</label>
-          <input type="number" class="form-control" id="numero" placeholder="Número" />
-        </div>
-        <div class="mb-3">
-          <label for="bairro" class="form-label">Bairro</label>
-          <input type="text" class="form-control" id="bairro" placeholder="Bairro" />
-        </div>
-        <div class="row">
-          <div class="col-md-8">
-            <label for="cidade" class="form-label">Cidade</label>
-            <input type="text" class="form-control" id="cidade" placeholder="Cidade" />
+        <div class="card-body">
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Digite o nome do produto..." id="input-busca" />
+            <input type="number" class="form-control" value="1" style="max-width: 80px" id="input-quantidade" />
+            <button type="button" class="btn btn-primary" id="btn-adicionar">Adicionar</button>
           </div>
-          <div class="col-md-4">
-            <label for="estado" class="form-label">Estado</label>
-            <input type="text" class="form-control" id="estado" placeholder="UF" />
+
+          <div id="search-results" class="list-group mt-2"></div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Itens da Venda</h5>
+        </div>
+        <div class="card-body text-center text-muted" style="min-height: 250px">
+          <div id="estado-vazio" class="flex-column justify-content-center h-100">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="48"
+              height="48"
+              fill="currentColor"
+              class="bi bi-cart3 mx-auto"
+              viewBox="0 0 16 16"
+            ></svg>
+            <p class="mt-3">Nenhum produto adicionado</p>
+          </div>
+
+          <div id="lista-itens" style="display: none" class="text-start">
+            <table class="table table-bordered mt-3">
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th>Qtd</th>
+                  <th>Preço</th>
+                  <th>Fornecedor</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody id="corpo-tabela"></tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="card shadow-sm" id="resumo-venda">
-      <div class="card-body">
-        <div class="d-flex justify-content-between h4">
-          <strong>Total:</strong>
-          <strong id="total-venda">R$ 0.00</strong>
+    <div class="col-lg-5">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-person"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"
+              />
+            </svg>
+            Dados do Cliente
+          </h5>
         </div>
-        <div class="d-grid mt-3">
-          <button class="btn btn-success btn-lg" id="btn-finalizar" disabled>Finalizar Venda</button>
+        <div class="card-body">
+          <div class="mb-3">
+              <label for="nomeCliente" class="form-label">Nome do Cliente *</label>
+              <input type="text" class="form-control" id="nomeCliente" name="cliente" placeholder="Digite o nome do cliente" required />
+              <div class="invalid-feedback">
+                  Por favor, informe o nome do cliente.
+              </div>
+          </div>
+          <div>
+            <label for="dataVenda" class="form-label">Data da Venda *</label>
+            <input type="date" class="form-control" id="dataVenda" name="data" value="{{ today|date:'Y-m-d' }}" />
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-4">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-geo-alt"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"
+              />
+              <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+            </svg>
+            Endereço de Entrega
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+              <label for="cep" class="form-label">CEP *</label>
+              <input type="text" class="form-control" id="cep" name="cep" placeholder="Somente números" maxlength="8" required />
+              <div class="invalid-feedback">
+                  Por favor, informe um CEP válido.
+              </div>
+          </div>
+          <div class="mb-3">
+            <label for="rua" class="form-label">Rua</label>
+            <input type="text" class="form-control" id="rua" name="rua" placeholder="Rua, Avenida..." />
+          </div>
+          <div class="mb-3">
+            <label for="numero" class="form-label">Número</label>
+            <input type="number" class="form-control" id="numero" name="numero" placeholder="Número" />
+          </div>
+          <div class="mb-3">
+            <label for="bairro" class="form-label">Bairro</label>
+            <input type="text" class="form-control" id="bairro" name="bairro" placeholder="Bairro" />
+          </div>
+          <div class="row">
+            <div class="col-md-8">
+              <label for="cidade" class="form-label">Cidade</label>
+              <input type="text" class="form-control" id="cidade" name="cidade" placeholder="Cidade" />
+            </div>
+            <div class="col-md-4">
+              <label for="estado" class="form-label">Estado</label>
+              <input type="text" class="form-control" id="estado" name="estado" placeholder="UF" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm" id="resumo-venda">
+        <div class="card-body">
+          <div class="d-flex justify-content-between h4">
+            <strong>Total:</strong>
+            <strong id="total-venda">R$ 0.00</strong>
+          </div>
+          <div class="d-grid mt-3">
+            <button type="submit" id="btn-finalizar" class="btn btn-success" disabled>Finalizar Venda</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
-
+  </div> <input type="hidden" name="produtos_json" id="produtos-json-input" />
+</form>
 <script>
   const inputBusca = document.getElementById("input-busca");
   const resultadoContainer = document.getElementById("search-results");
@@ -227,6 +236,7 @@
                     </td>
                     <td>${produto.quantidade}</td>
                     <td>${subtotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</td>
+                    <td>${produto.fornecedor}</td>
                     <td>
                         <button class="btn btn-danger btn-sm btn-remover">Remover</button>
                     </td>
@@ -274,12 +284,14 @@
           link.dataset.produtoTitulo = produto.titulo;
           link.dataset.produtoPreco = produto.preco;
           link.dataset.produtoImagem = produto.imagem_url;
+          link.dataset.produtoFornecedor = produto.fornecedor;
           link.addEventListener("click", function (e) {
             e.preventDefault();
             inputBusca.value = this.dataset.produtoTitulo;
             inputBusca.dataset.produtoId = this.dataset.produtoId;
             inputBusca.dataset.produtoPreco = this.dataset.produtoPreco;
             inputBusca.dataset.produtoImagem = this.dataset.produtoImagem;
+            inputBusca.dataset.produtoFornecedor = this.dataset.produtoFornecedor;
 
             resultadoContainer.innerHTML = "";
           });
@@ -288,11 +300,13 @@
       });
   });
 
-  botaoAdicionar.addEventListener("click", function () {
+  botaoAdicionar.addEventListener("click", function (event) {
+    event.preventDefault();
     const produtoId = inputBusca.dataset.produtoId;
     const titulo = inputBusca.value;
     const preco = parseFloat(inputBusca.dataset.produtoPreco);
     const quantidade = parseInt(inputQuantidade.value);
+    const fornecedor = inputBusca.dataset.produtoFornecedor;
 
     if (!produtoId || isNaN(preco) || isNaN(quantidade) || quantidade <= 0) {
       alert("Selecione um produto válido e informe a quantidade.");
@@ -300,7 +314,7 @@
     }
 
     const imagemUrl = inputBusca.dataset.produtoImagem;
-    const produto = { id: produtoId, titulo, preco, quantidade, imagem_url: imagemUrl };
+    const produto = { id: produtoId, titulo, preco, quantidade, imagem_url: imagemUrl, fornecedor };
     produtosAdicionados.push(produto);
 
     adicionarLinhaNaTabela(produto);
@@ -345,5 +359,27 @@
   });
 
   atualizarVisibilidadeLista();
+
+  const formVenda = document.getElementById("form-venda");
+
+formVenda.addEventListener("submit", function (event) {
+    
+    event.preventDefault();
+
+    formVenda.classList.remove('was-validated');
+    formVenda.classList.add('was-validated');
+   
+    if (!formVenda.checkValidity() || produtosAdicionados.length === 0) {
+        if (produtosAdicionados.length === 0) {
+            alert("Adicione pelo menos um produto à venda antes de finalizar.");
+        }
+
+        return;
+    }
+  
+    document.getElementById("produtos-json-input").value = JSON.stringify(produtosAdicionados);
+    
+    formVenda.submit();
+});
 </script>
 {% endblock %}

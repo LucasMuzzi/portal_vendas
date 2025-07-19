@@ -125,3 +125,6 @@ LOGOUT_REDIRECT_URL = "/"
 
 MEDIA_URL = "/portal_de_vendas/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "portal_de_vendas/media")
+
+MONGO_URI = "mongodb+srv://lucasmuzzi:foRlSTnXug4e0fEd@cluster0.1vizb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+MONGO_DATABASE_NAME = "historico_vendas"
