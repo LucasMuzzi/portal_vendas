@@ -1,14 +1,21 @@
 {% extends "base.html" %} {% block title %}SEMEQ - Nova Venda{% endblock %} {% block content %} {% load static %}
 <nav class="navbar bg-body-tertiary mb-4">
   <div class="container d-flex justify-content-between align-items-center">
-    <a class="navbar-brand" href="https://semeq.com/pt/home/" target="_blank">
+    
+    <a class="navbar-brand" href="{% url 'vendas' %}">
       <img src="{% static 'images/semeq_logo_branco.png' %}" alt="Logo Semeq" width="100" />
     </a>
 
-    <form action="{% url 'logout' %}" method="post" class="d-inline">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-danger btn-sm">Sair</button>
-    </form>
+    <div class="d-flex align-items-center">
+      
+       <a href="{% url 'historico_vendas' %}" class="btn btn-outline-secondary btn-sm me-3">Histórico</a>
+
+      <form action="{% url 'logout' %}" method="post" class="d-inline mb-0">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-sm">Sair</button>
+      </form>
+    </div>
+    
   </div>
 </nav>
 

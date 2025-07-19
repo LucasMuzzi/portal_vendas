@@ -5,10 +5,14 @@
       <img src="{% static 'images/semeq_logo_branco.png' %}" alt="Logo Semeq" width="100" />
     </a>
 
-    <form action="{% url 'logout' %}" method="post" class="d-inline">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-danger btn-sm">Sair</button>
-    </form>
+    <div class="d-flex align-items-center">
+      <a href="{% url 'vendas' %}" class="btn btn-outline-secondary btn-sm me-3">Vendas</a>
+
+      <form action="{% url 'logout' %}" method="post" class="d-inline mb-0">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-sm">Sair</button>
+      </form>
+    </div>
   </div>
 </nav>
 <div class="container my-4">

@@ -9,10 +9,12 @@ from pymongo import MongoClient
 from django.conf import settings
 from datetime import datetime
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
 
+@login_required
 def pagina_vendas(request):
     context = {
         "today": date.today(),
@@ -47,6 +49,7 @@ def buscar_produtos(request):
     return JsonResponse(resultado, safe=False)
 
 
+@login_required
 def registrar_venda(request):
 
     if request.method == "POST":
@@ -162,6 +165,10 @@ def registrar_venda(request):
 def historico_vendas(request):
     vendas_historico = []
     cliente_email = request.GET.get("email", None)
+
+    if not cliente_email and not request.user.is_authenticated:
+
+        return redirect("login")
 
     query = {}
     if cliente_email:

@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+from django.contrib.messages import constants as message_constants
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -121,7 +122,7 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
+LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "/vendas/"
 LOGOUT_REDIRECT_URL = "/"
 
@@ -130,3 +131,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "portal_de_vendas/media")
 
 MONGO_URI = "mongodb+srv://lucasmuzzi:foRlSTnXug4e0fEd@cluster0.1vizb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 MONGO_DATABASE_NAME = "historico_vendas"
+
+MESSAGE_TAGS = {
+    message_constants.DEBUG: "secondary",
+    message_constants.INFO: "info",
+    message_constants.SUCCESS: "success",
+    message_constants.WARNING: "warning",
+    message_constants.ERROR: "danger",
+}
