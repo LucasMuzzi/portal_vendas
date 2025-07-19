@@ -7,6 +7,7 @@ from datetime import date
 from django.db import transaction
 from pymongo import MongoClient
 from django.conf import settings
+from datetime import datetime
 
 # Create your views here.
 
@@ -46,11 +47,12 @@ def buscar_produtos(request):
 
 
 def registrar_venda(request):
-    ## Verifico qual foi o método de requisição do meu form.
+
     if request.method == "POST":
 
-        # Resgato o valor de todos os inputs
+        # Coleta de dados
         cliente_nome = request.POST.get("cliente")
+        cliente_email = request.POST.get("cliente_email")
         data_venda = request.POST.get("data")
         cep = request.POST.get("cep")
         rua = request.POST.get("rua")
@@ -60,42 +62,42 @@ def registrar_venda(request):
         estado = request.POST.get("estado")
         produtos_json = request.POST.get("produtos_json")
 
-        # Valido se algo está faltando
+        if numero == "":
+            numero = None
+
         if not all(
             [
                 cliente_nome,
+                cliente_email,
                 data_venda,
                 cep,
                 rua,
-                numero,
                 bairro,
                 cidade,
                 estado,
                 produtos_json,
             ]
         ):
-            messages.error(request, "Preencha todos os campos obrigatórios.")
 
+            messages.error(request, "Preencha todos os campos obrigatórios.")
             context = {"today": date.today()}
             return render(request, "vendas.html", context)
 
         try:
-            ## Aqui começo a transação para poder gravar no postgres
+
             with transaction.atomic():
 
-                # Resgato o json dos produtos
                 produtos = json.loads(produtos_json)
-
-                # Valido se há pelo menos um produto, caso não, retorno um erro para o front-end
                 if not produtos:
+
                     messages.error(request, "Adicione pelo menos um produto à venda.")
                     context = {"today": date.today()}
                     return render(request, "vendas.html", context)
 
-                # Se deu certo, crio o cliente caso não exista
-                cliente, _ = Cliente.objects.get_or_create(nome=cliente_nome)
+                cliente, criado = Cliente.objects.update_or_create(
+                    email=cliente_email, defaults={"nome": cliente_nome}
+                )
 
-                # Faço o mesmo para minha tabela de venda, que registra os dados do endereço
                 venda = Venda.objects.create(
                     cliente=cliente,
                     data=data_venda,
@@ -107,7 +109,6 @@ def registrar_venda(request):
                     estado=estado,
                 )
 
-                # Faço um for para percorrer os produtos que recebi no JSON, assim posso gravar todos os itens que foram vendidos
                 for item in produtos:
                     produto_obj = Produto.objects.get(id=item["id"])
                     quantidade = item["quantidade"]
@@ -116,17 +117,14 @@ def registrar_venda(request):
                     )
 
             try:
-                # Aqui começo a validação no meu mongoDB, a ideia é gravar um snapshot do momento da venda..
 
-                # Inicio a conexão no mongoDB
                 client = MongoClient(settings.MONGO_URI)
                 db = client[settings.MONGO_DATABASE_NAME]
                 collection = db["vendas"]
 
-                # Crio o objeto que vou poupular a tabela
                 venda_documento = {
                     "venda_id_postgres": venda.id,
-                    "cliente": cliente_nome,
+                    "cliente": {"nome": cliente_nome, "email": cliente_email},
                     "data_venda": data_venda,
                     "endereco_entrega": {
                         "cep": cep,
@@ -142,26 +140,50 @@ def registrar_venda(request):
                     ),
                 }
 
-                # Faço o insert na tabela
                 collection.insert_one(venda_documento)
-                # Encerro a conexão do mongoDB
                 client.close()
 
             except Exception as e:
-                # Caso haja alguma excessão, trato com um print aqui
-                print(
-                    f"AVISO: A venda foi salva no PostgreSQL, mas falhou ao salvar no MongoDB: {e}"
-                )
+                print(f"!!! AVISO: Falha ao salvar no MongoDB: {e} !!!")
 
-            # Se tudo certo, vou registrar a venda e direcionar novamente para a pagina, permitindo outra venda
             messages.success(request, "Venda registrada com sucesso!")
             return redirect("vendas")
 
         except Exception as e:
-            # Trato aqui caso ocorra um erro na transação
-            messages.error(request, "Ocorreu um erro inesperado ao salvar a venda.")
 
+            messages.error(request, "Ocorreu um erro inesperado ao salvar a venda.")
             context = {"today": date.today()}
             return render(request, "vendas.html", context)
 
     return redirect("vendas")
+
+
+def historico_vendas(request):
+
+    vendas_historico = []
+    try:
+        client = MongoClient(settings.MONGO_URI)
+        db = client[settings.MONGO_DATABASE_NAME]
+        vendas_cursor = db["vendas"].find().sort("_id", -1)
+
+        for venda in vendas_cursor:
+            venda["id_str"] = str(venda["_id"])
+            venda["produtos"] = venda.get("produtos", [])
+            data_str = venda.get("data_venda", "")
+            if data_str:
+
+                data_obj = datetime.strptime(data_str, "%Y-%m-%d")
+
+                venda["data_venda_formatada"] = data_obj.strftime("%d/%m/%Y")
+            else:
+
+                venda["data_venda_formatada"] = "N/A"
+            vendas_historico.append(venda)
+
+        client.close()
+    except Exception:
+
+        messages.error(request, "Não foi possível carregar o histórico de vendas.")
+
+    context = {"vendas": vendas_historico}
+    return render(request, "historico.html", context)

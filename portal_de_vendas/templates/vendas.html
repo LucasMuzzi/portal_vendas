@@ -85,17 +85,27 @@
           </h5>
         </div>
         <div class="card-body">
-          <div class="mb-3">
-              <label for="nomeCliente" class="form-label">Nome do Cliente *</label>
-              <input type="text" class="form-control" id="nomeCliente" name="cliente" placeholder="Digite o nome do cliente" required />
-              <div class="invalid-feedback">
-                  Por favor, informe o nome do cliente.
-              </div>
-          </div>
-          <div>
-            <label for="dataVenda" class="form-label">Data da Venda *</label>
-            <input type="date" class="form-control" id="dataVenda" name="data" value="{{ today|date:'Y-m-d' }}" />
-          </div>
+            <div class="mb-3">
+                <label for="nomeCliente" class="form-label">Nome do Cliente *</label>
+                <input type="text" class="form-control" id="nomeCliente" name="cliente" placeholder="Digite o nome do cliente" required />
+                <div class="invalid-feedback">Por favor, informe o nome do cliente.</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="emailCliente" class="form-label">E-mail do Cliente *</label>
+                <input 
+                    type="email" 
+                    class="form-control" 
+                    id="emailCliente" 
+                    name="cliente_email"  placeholder="email@exemplo.com" 
+                    required />           
+                <div class="invalid-feedback">Por favor, informe um e-mail válido.</div>
+            </div>
+
+            <div>
+                <label for="dataVenda" class="form-label">Data da Venda *</label>
+                <input type="date" class="form-control" id="dataVenda" name="data" value="{{ today|date:'Y-m-d' }}" />
+            </div>
         </div>
       </div>
 

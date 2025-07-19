@@ -14,6 +14,7 @@ urlpatterns = [
     path("vendas/", views.pagina_vendas, name="vendas"),
     path("buscar-produto/", views.buscar_produtos, name="buscar_produto"),
     path("registrar-venda/", views.registrar_venda, name="registrar_venda"),
+    path("historico/", views.historico_vendas, name="historico_vendas"),
 ]
 
 if settings.DEBUG:

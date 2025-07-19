@@ -27,6 +27,7 @@ class Produto(models.Model):
 
 class Cliente(models.Model):
     nome = models.CharField(max_length=100)
+    email = models.EmailField(max_length=254, unique=True, verbose_name="E-mail")
 
 
 class Venda(models.Model):
@@ -34,7 +35,7 @@ class Venda(models.Model):
     data = models.DateField()
     cep = models.CharField(max_length=8)
     rua = models.CharField(max_length=100)
-    numero = models.IntegerField()
+    numero = models.IntegerField(null=True, blank=True)
     bairro = models.CharField(max_length=100)
     cidade = models.CharField(max_length=100)
     estado = models.CharField(max_length=2)

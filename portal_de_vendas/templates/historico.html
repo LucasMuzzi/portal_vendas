@@ -1,0 +1,88 @@
+{% extends "base.html" %} {% block title %}Histórico{% endblock %} {% block content %} {% load static %} {% load l10n %}
+<nav class="navbar bg-body-tertiary mb-4">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a class="navbar-brand" href="https://semeq.com/pt/home/" target="_blank">
+      <img src="{% static 'images/semeq_logo_branco.png' %}" alt="Logo Semeq" width="100" />
+    </a>
+
+    <form action="{% url 'logout' %}" method="post" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger btn-sm">Sair</button>
+    </form>
+  </div>
+</nav>
+<div class="container my-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-white">Histórico</h1>
+  </div>
+
+  {% if vendas %}
+  <div class="accordion" id="accordionHistoricoVendas">
+    {% for venda in vendas %}
+    <div class="accordion-item shadow-sm mb-2">
+      <h2 class="accordion-header" id="heading-{{ venda.id_str }}">
+        <button
+          class="accordion-button collapsed"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapse-{{ venda.id_str }}"
+        >
+          <div class="w-100 d-flex justify-content-between align-items-center pe-3">
+            <span class="fw-bold">Venda #{{ venda.venda_id_postgres }}</span>
+
+            <span><strong>Cliente:</strong> {{ venda.cliente.nome }}</span>
+            <span class="d-none d-md-block"><strong>Data:</strong> {{ venda.data_venda_formatada }}</span>
+            <span><strong>Total:</strong> R$ {{ venda.total_venda|floatformat:"-2" }}</span>
+          </div>
+        </button>
+      </h2>
+      <div
+        id="collapse-{{ venda.id_str }}"
+        class="accordion-collapse collapse"
+        data-bs-parent="#accordionHistoricoVendas"
+      >
+        <div class="accordion-body">
+          <div class="row">
+            <div class="col-md-7">
+              <h6>Produtos Comprados</h6>
+              <table class="table table-sm table-bordered">
+                <thead>
+                  <tr>
+                    <th>Produto</th>
+                    <th>Qtd</th>
+                    <th>Preço Unit.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for produto in venda.produtos %}
+                  <tr>
+                    <td>{{ produto.titulo }}</td>
+                    <td>{{ produto.quantidade }}</td>
+                    <td>R$ {{ produto.preco|floatformat:"-2" }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <div class="col-md-5">
+              <h6>Endereço de Entrega</h6>
+              <p class="mb-1">
+                <strong>Rua:</strong> {{ venda.endereco_entrega.rua }}, {{ venda.endereco_entrega.numero }}
+              </p>
+              <p class="mb-1"><strong>Bairro:</strong> {{ venda.endereco_entrega.bairro }}</p>
+              <p class="mb-1">
+                <strong>Cidade/UF:</strong> {{ venda.endereco_entrega.cidade }} / {{ venda.endereco_entrega.estado }}
+              </p>
+              <p class="mb-1"><strong>CEP:</strong> {{ venda.endereco_entrega.cep }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-info text-center">Nenhuma venda encontrada no histórico.</div>
+  {% endif %}
+</div>
+{% endblock %}
