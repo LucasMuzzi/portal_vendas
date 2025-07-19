@@ -8,6 +8,7 @@ from django.db import transaction
 from pymongo import MongoClient
 from django.conf import settings
 from datetime import datetime
+from django.urls import reverse
 
 # Create your views here.
 
@@ -159,31 +160,53 @@ def registrar_venda(request):
 
 
 def historico_vendas(request):
-
     vendas_historico = []
+    cliente_email = request.GET.get("email", None)
+
+    query = {}
+    if cliente_email:
+        query = {"cliente.email": cliente_email}
+
     try:
         client = MongoClient(settings.MONGO_URI)
         db = client[settings.MONGO_DATABASE_NAME]
-        vendas_cursor = db["vendas"].find().sort("_id", -1)
+
+        vendas_cursor = db["vendas"].find(query).sort("_id", -1)
 
         for venda in vendas_cursor:
             venda["id_str"] = str(venda["_id"])
             venda["produtos"] = venda.get("produtos", [])
             data_str = venda.get("data_venda", "")
             if data_str:
-
                 data_obj = datetime.strptime(data_str, "%Y-%m-%d")
-
                 venda["data_venda_formatada"] = data_obj.strftime("%d/%m/%Y")
             else:
-
                 venda["data_venda_formatada"] = "N/A"
             vendas_historico.append(venda)
 
         client.close()
-    except Exception:
-
+    except Exception as e:
+        print(f"ERRO AO BUSCAR HISTÓRICO NO MONGODB: {e}")
         messages.error(request, "Não foi possível carregar o histórico de vendas.")
 
-    context = {"vendas": vendas_historico}
+    context = {
+        "vendas": vendas_historico,
+        "cliente_email": cliente_email,
+    }
     return render(request, "historico.html", context)
+
+
+def buscar_historico_cliente(request):
+    if request.method == "POST":
+        cliente_email = request.POST.get("cliente_email")
+
+        if Cliente.objects.filter(email=cliente_email).exists():
+
+            base_url = reverse("historico_vendas")
+            query_string = f"?email={cliente_email}"
+            return redirect(base_url + query_string)
+        else:
+            messages.error(request, "Nenhum cliente encontrado com este e-mail.")
+            return redirect("login")
+
+    return redirect("login")

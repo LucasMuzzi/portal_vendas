@@ -15,6 +15,11 @@ urlpatterns = [
     path("buscar-produto/", views.buscar_produtos, name="buscar_produto"),
     path("registrar-venda/", views.registrar_venda, name="registrar_venda"),
     path("historico/", views.historico_vendas, name="historico_vendas"),
+    path(
+        "buscar-historico/",
+        views.buscar_historico_cliente,
+        name="buscar_historico_cliente",
+    ),
 ]
 
 if settings.DEBUG:
