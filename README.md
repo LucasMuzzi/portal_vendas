@@ -37,10 +37,10 @@ Siga os passos abaixo para configurar e rodar o ambiente de desenvolvimento loca
 
 ### 1. Clonar o Repositório
 
-````bash
-git clone [https://github.com/LucasMuzzi/portal_vendas.git](https://github.com/LucasMuzzi/portal_vendas.git)
-cd portal_vendas
-````
+```bash
+git clone https://github.com/LucasMuzzi/portal_vendas.git
+
+```
 
 ### 2. Configurar o Ambiente
 
@@ -54,7 +54,7 @@ python -m venv venv
 # macOS / Linux
 python3 -m venv venv
 source venv/bin/activate
-````
+```
 
 Instale todas as dependências do projeto:
 
