@@ -40,6 +40,7 @@ Siga os passos abaixo para configurar e rodar o ambiente de desenvolvimento loca
 ````bash
 git clone [https://github.com/LucasMuzzi/portal_vendas.git](https://github.com/LucasMuzzi/portal_vendas.git)
 cd portal_vendas
+````
 
 ### 2. Configurar o Ambiente
 
