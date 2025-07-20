@@ -41,6 +41,7 @@
         <div class="card-body">
           <div class="input-group">
             <input type="text" class="form-control" placeholder="Digite o nome do produto..." id="input-busca" />
+            <button type="button" class="btn btn-outline-secondary" id="btn-mostrar-todos">▼</button>
             <input type="number" class="form-control" value="1" min="1" style="max-width: 80px" id="input-quantidade" />
             <button type="button" class="btn btn-primary" id="btn-adicionar">Adicionar</button>
           </div>
@@ -198,6 +199,7 @@
 <script>
   const inputBusca = document.getElementById("input-busca");
   const resultadoContainer = document.getElementById("search-results");
+  const botaoMostrarTodos = document.getElementById("btn-mostrar-todos");
   const inputQuantidade = document.getElementById("input-quantidade");
   const botaoAdicionar = document.getElementById("btn-adicionar");
 
@@ -328,6 +330,57 @@
         });
       });
   });
+
+  botaoMostrarTodos.addEventListener("click", function () {
+  resultadoContainer.innerHTML = "";
+
+  fetch(`/buscar-produto/?term=`)
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.length === 0) {
+        resultadoContainer.innerHTML = "<div class='text-muted p-2'>Nenhum produto encontrado.</div>";
+        return;
+      }
+
+      data.forEach((produto) => {
+        const link = document.createElement("a");
+        link.href = "#";
+        link.className = "list-group-item list-group-item-action";
+        link.innerHTML = `
+          <div class="d-flex align-items-center">
+              <img src="${produto.imagem_url}" alt="${produto.titulo}" style="width: 50px; height: auto; margin-right: 10px;">
+              <div>
+                  <div><strong>${produto.titulo}</strong></div>
+                  <div>${parseFloat(produto.preco).toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}</div>
+              </div>
+          </div>
+        `;
+        link.dataset.produtoId = produto.id;
+        link.dataset.produtoTitulo = produto.titulo;
+        link.dataset.produtoPreco = produto.preco;
+        link.dataset.produtoImagem = produto.imagem_url;
+        link.dataset.produtoFornecedor = produto.fornecedor;
+        link.addEventListener("click", function (e) {
+          e.preventDefault();
+          inputBusca.value = this.dataset.produtoTitulo;
+          inputBusca.dataset.produtoId = this.dataset.produtoId;
+          inputBusca.dataset.produtoPreco = this.dataset.produtoPreco;
+          inputBusca.dataset.produtoImagem = this.dataset.produtoImagem;
+          inputBusca.dataset.produtoFornecedor = this.dataset.produtoFornecedor;
+
+          resultadoContainer.innerHTML = "";
+        });
+        resultadoContainer.appendChild(link);
+      });
+    })
+    .catch((error) => {
+      resultadoContainer.innerHTML = "<div class='text-danger p-2'>Erro ao carregar produtos.</div>";
+      console.error(error);
+    });
+});
 
   botaoAdicionar.addEventListener("click", function (event) {
     event.preventDefault();

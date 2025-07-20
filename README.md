@@ -22,7 +22,6 @@ Este projeto foi desenvolvido como parte do teste de aptidão para a vaga de Des
 - **Frontend:** HTML5, CSS3, JavaScript (ES6+), Bootstrap 5
 - **Banco de Dados Principal:** PostgreSQL
 - **Banco de Dados de Histórico:** MongoDB
-- **Dependências Python:** `psycopg2-binary`, `pymongo`, `Pillow`
 
 ## 🚀 Como Executar o Projeto
 
