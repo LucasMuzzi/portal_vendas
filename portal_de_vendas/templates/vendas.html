@@ -106,8 +106,8 @@
         </div>
         <div class="card-body">
             <div class="mb-3">
-                <label for="nomeCliente" class="form-label">Nome do Cliente *</label>
-                <input type="text" class="form-control" id="nomeCliente" name="cliente" placeholder="Digite o nome do cliente" required />
+                <label for="nomeCliente" class="form-label" maxlength="50">Nome do Cliente *</label>
+                <input type="text" class="form-control" id="nomeCliente" name="cliente" placeholder="Digite o nome do cliente" required maxlength="50" />
                 <div class="invalid-feedback">Por favor, informe o nome do cliente.</div>
             </div>
 
@@ -323,6 +323,7 @@
             inputBusca.dataset.produtoPreco = this.dataset.produtoPreco;
             inputBusca.dataset.produtoImagem = this.dataset.produtoImagem;
             inputBusca.dataset.produtoFornecedor = this.dataset.produtoFornecedor;
+            inputBusca.dataset.produtoTitulo = this.dataset.produtoTitulo;
 
             resultadoContainer.innerHTML = "";
           });
@@ -385,7 +386,7 @@
   botaoAdicionar.addEventListener("click", function (event) {
     event.preventDefault();
     const produtoId = inputBusca.dataset.produtoId;
-    const titulo = inputBusca.value;
+    const titulo = inputBusca.dataset.produtoTitulo
     const preco = parseFloat(inputBusca.dataset.produtoPreco);
     const quantidade = parseInt(inputQuantidade.value);
     const fornecedor = inputBusca.dataset.produtoFornecedor;
