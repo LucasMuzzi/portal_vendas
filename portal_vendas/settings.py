@@ -66,9 +66,9 @@ WSGI_APPLICATION = "portal_vendas.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "portal_vendas_final",
-        "USER": "postgres",
-        "PASSWORD": "123",
+        "NAME": "",
+        "USER": "",
+        "PASSWORD": "",
         "HOST": "localhost",
         "PORT": "5432",
     }
