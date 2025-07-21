@@ -69,6 +69,11 @@
                     />
                     <label for="floatingPassword">Senha</label>
                   </div>
+
+                  {% if form.errors %}
+                  <div class="alert alert-danger py-2 small">Usuário ou senha inválidos.</div>
+                  {% endif %}
+
                   <div class="d-grid">
                     <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
                   </div>

@@ -28,18 +28,20 @@ def buscar_produtos(request):
         produtos = Produto.objects.filter(titulo__icontains=termo_para_buscar)
         resultado = []
         for produto in produtos:
+            nome_fornecedor = produto.fornecedor.nome if produto.fornecedor else ""
             imagem_url = (
                 produto.imagem.url
                 if produto.imagem and hasattr(produto.imagem, "url")
                 else ""
             )
+
             resultado.append(
                 {
                     "id": produto.id,
                     "titulo": produto.titulo,
                     "descricao": produto.descricao,
                     "preco": str(produto.preco),
-                    "fornecedor": produto.fornecedor if produto.fornecedor else "",
+                    "fornecedor": nome_fornecedor,
                     "imagem_url": imagem_url,
                 }
             )
