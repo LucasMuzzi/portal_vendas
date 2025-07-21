@@ -2,7 +2,7 @@ import json
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib import messages
-from .models import Produto, Venda, Cliente, VendaProduto
+from .models import Produto, Venda, Cliente, VendaProduto, Fornecedor
 from datetime import date
 from django.db import transaction
 from pymongo import MongoClient
@@ -23,29 +23,39 @@ def pagina_vendas(request):
 
 
 def buscar_produtos(request):
-    ## Aqui eu vou resgatar o que foi solicitado pelo input
     termo_para_buscar = request.GET.get("term", "")
+    try:
+        produtos = Produto.objects.filter(titulo__icontains=termo_para_buscar)
+        resultado = []
+        for produto in produtos:
+            imagem_url = (
+                produto.imagem.url
+                if produto.imagem and hasattr(produto.imagem, "url")
+                else ""
+            )
+            resultado.append(
+                {
+                    "id": produto.id,
+                    "titulo": produto.titulo,
+                    "descricao": produto.descricao,
+                    "preco": str(produto.preco),
+                    "fornecedor": produto.fornecedor if produto.fornecedor else "",
+                    "imagem_url": imagem_url,
+                }
+            )
+        return JsonResponse(resultado, safe=False)
+    except Exception as e:
+        print(f"Erro na view buscar_produtos: {e}")  # Log no terminal
+        return JsonResponse({"error": str(e)}, status=500)
 
-    ## Faço um filtro dentro do meu model de gerenciamento de produtos, buscando o que foi resgatado pelo input
-    produtos = Produto.objects.filter(titulo__icontains=termo_para_buscar)
 
-    ## Crio uma lista vazia para popular
-    resultado = []
+def buscar_fornecedores(request):
+    produto_id = request.GET.get("produto_id")
+    if not produto_id:
+        return JsonResponse([], safe=False)
 
-    ## Percorro no meu for os produtos resgatados, assim eu crio um JSON para poder popular com os dados
-    for produto in produtos:
-        resultado.append(
-            {
-                "id": produto.id,
-                "titulo": produto.titulo,
-                "descricao": produto.descricao,
-                "preco": str(produto.preco),
-                "fornecedor": produto.fornecedor,
-                "imagem_url": produto.imagem.url if produto.imagem else "",
-            }
-        )
-
-    ## Retorno o JSON
+    fornecedores = Fornecedor.objects.all()
+    resultado = [{"id": f.id, "nome": f.nome} for f in fornecedores]
     return JsonResponse(resultado, safe=False)
 
 

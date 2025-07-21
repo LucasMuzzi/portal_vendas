@@ -2,6 +2,19 @@ from django.db import models
 
 
 # Create your models here.
+class Fornecedor(models.Model):
+    nome = models.CharField(
+        max_length=100, verbose_name="Nome do Fornecedor", null=False, blank=False
+    )
+
+    def __str__(self):
+        return self.nome
+
+    class Meta:
+        verbose_name = "Fornecedor"
+        verbose_name_plural = "Fornecedores"
+
+
 class Produto(models.Model):
     titulo = models.CharField(
         max_length=200, verbose_name="Título", null=False, blank=False
@@ -10,8 +23,12 @@ class Produto(models.Model):
     preco = models.DecimalField(
         max_digits=20, decimal_places=2, null=False, blank=False
     )
-    fornecedor = models.CharField(
-        max_length=100, blank=True, null=True, verbose_name="Fornecedor"
+    fornecedor = models.ForeignKey(
+        Fornecedor,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Fornecedor",
     )
     imagem = models.ImageField(
         upload_to="produtos/", blank=True, null=True, verbose_name="Img Produto"

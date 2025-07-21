@@ -100,10 +100,10 @@ Aplique as migrações para criar as tabelas no PostgreSQL:
 python manage.py migrate
 ```
 
-Carregue os dados iniciais de produtos na tabela:
+Carregue os dados iniciais nas tabelas:
 
 ```bash
-python manage.py loaddata produtos.json
+python manage.py loaddata backup.json
 ```
 
 Crie um superusuário para acessar o painel de admin e a área do vendedor:

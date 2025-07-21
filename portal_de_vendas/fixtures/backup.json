@@ -6,7 +6,6 @@
       "titulo": "AXON HD Vibração e Trigger Interno",
       "descricao": "Espera a máquina 'acordar' para realizar a medição\r\nHeavy Duty – Alta resistência a ataques químicos, água e poeira\r\nTriaxial\r\nFFT, Envelope, Onda no Tempo, e Nível Global\r\nResposta de Frequência: 10 kHz\r\nComunicação sem fio (wireless) via Bluetooth® Low Energy 5.1\r\nBateria de Longa Duração e substituível\r\nDispositivo IOT\r\nGrau de Proteção: IP 69 K",
       "preco": "13500.00",
-      "fornecedor": "SEMEQ",
       "imagem": "produtos/AXON_HD_Vibração_e_Trigger_Interno_4gioph3.webp"
     }
   },
@@ -17,7 +16,6 @@
       "titulo": "AXON HD Vibração e Trigger Externo",
       "descricao": "Executa a medição mesmo com a máquina 'dormindo'\r\nHeavy Duty – Alta resistência a ataques químicos, água e poeira\r\nTriaxial\r\nFFT, Envelope, Onda no Tempo, e Nível Global\r\nResposta de Frequência: 10 kHz\r\nComunicação sem fio (wireless) via Bluetooth® Low Energy 5.1\r\nBateria de Longa Duração e substituível\r\nDispositivo IOT\r\nGrau de Proteção: IP 69 K",
       "preco": "12800.00",
-      "fornecedor": "SEMEQ",
       "imagem": "produtos/AXON_HD_Vibração_e_Trigger_Externo.webp"
     }
   },
@@ -28,8 +26,28 @@
       "titulo": "AXON HD 3D Vibração e Temperatura",
       "descricao": "Heavy Duty – Alta resistência a ataques químicos, água e poeira\r\nTriaxial\r\nFFT, Envelope, Onda no Tempo, e Nível Global\r\nResposta de Frequência: 10 kHz\r\nComunicação sem fio (wireless) via Bluetooth® Low Energy 5.1\r\nBateria de Longa Duração e Substituível\r\nDispositivo IOT\r\nGrau de Proteção: IP 69 K +++",
       "preco": "15000.00",
-      "fornecedor": "SEMEQ",
       "imagem": "produtos/AXON_HD_3D_Vibração_e_Temperatura.webp"
+    }
+  },
+  {
+    "model": "portal_de_vendas.fornecedor",
+    "pk": 1,
+    "fields": {
+      "nome": "SEMEQ - LIMEIRA"
+    }
+  },
+  {
+    "model": "portal_de_vendas.fornecedor",
+    "pk": 2,
+    "fields": {
+      "nome": "SEMEQ - ST LOUIS"
+    }
+  },
+  {
+    "model": "portal_de_vendas.fornecedor",
+    "pk": 3,
+    "fields": {
+      "nome": "SEMEQ - FILIPINAS"
     }
   }
 ]

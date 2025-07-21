@@ -196,7 +196,29 @@
   </div>
   </div> <input type="hidden" name="produtos_json" id="produtos-json-input" />
 </form>
+
+
+<div class="modal fade" id="fornecedorModal" tabindex="-1" aria-labelledby="fornecedorModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="fornecedorModalLabel">Escolha o Fornecedor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <ul id="fornecedores-list" class="list-group"></ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        <button type="button" class="btn btn-primary" id="confirmar-fornecedor">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script>
+document.addEventListener("DOMContentLoaded", function () {
   const inputBusca = document.getElementById("input-busca");
   const resultadoContainer = document.getElementById("search-results");
   const botaoMostrarTodos = document.getElementById("btn-mostrar-todos");
@@ -217,20 +239,19 @@
   const estadoInput = document.getElementById("estado");
 
   let produtosAdicionados = [];
+  let selectedFornecedor = null;
 
   function atualizarResumoVenda() {
     let total = 0;
-
     produtosAdicionados.forEach((produto) => {
       total += produto.preco * produto.quantidade;
     });
-
     totalVenda.textContent = total.toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
     });
-
     botaoFinalizar.disabled = produtosAdicionados.length === 0;
+
   }
 
   function limparCamposProduto() {
@@ -239,186 +260,241 @@
     delete inputBusca.dataset.produtoId;
     delete inputBusca.dataset.produtoPreco;
     delete inputBusca.dataset.produtoImagem;
+    selectedFornecedor = null;
+   
   }
 
   function atualizarVisibilidadeLista() {
     const temItens = produtosAdicionados.length > 0;
-
     estadoVazio.classList.toggle("d-none", temItens);
     estadoVazio.classList.toggle("d-flex", !temItens);
-
     listaItensContainer.style.display = temItens ? "block" : "none";
+  
   }
 
   function adicionarLinhaNaTabela(produto) {
     const tr = document.createElement("tr");
     tr.dataset.uid = produto.uid;
-
     const subtotal = produto.preco * produto.quantidade;
-
     tr.innerHTML = `
-                    <td>
-                        <div class="d-flex align-items-center">
-                        <img src="${produto.imagem_url}" alt="${
-      produto.titulo
-    }" style="width: 40px; height: auto; margin-right: 10px;">
-                        ${produto.titulo}
-                        </div>
-                    </td>
-                    <td>${produto.quantidade}</td>
-                    <td>${subtotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</td>
-                    <td>${produto.fornecedor}</td>
-                    <td>
-                        <button class="btn btn-danger btn-sm btn-remover">Remover</button>
-                    </td>
-                    `;
-
+      <td>
+        <div class="d-flex align-items-center">
+          <img src="${produto.imagem_url}" alt="${produto.titulo}" style="width: 40px; height: auto; margin-right: 10px;">
+          ${produto.titulo}
+        </div>
+      </td>
+      <td>${produto.quantidade}</td>
+      <td>${subtotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</td>
+      <td>${produto.fornecedor}</td>
+      <td>
+        <button class="btn btn-danger btn-sm btn-remover">Remover</button>
+      </td>
+    `;
     tr.querySelector(".btn-remover").addEventListener("click", () => {
       produtosAdicionados = produtosAdicionados.filter((p) => p.uid !== produto.uid);
       tr.remove();
       atualizarVisibilidadeLista();
       atualizarResumoVenda();
+  
     });
-
     corpoTabela.appendChild(tr);
+
+  }
+
+  function carregarFornecedores(produtoId) {
+    fetch(`/buscar-fornecedores/?produto_id=${produtoId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        const fornecedoresList = document.getElementById("fornecedores-list");
+        fornecedoresList.innerHTML = "";
+        if (!data || data.length === 0) {
+          fornecedoresList.innerHTML = "<li class='list-group-item text-muted'>Nenhum fornecedor disponível.</li>";
+          return;
+        }
+        data.forEach((fornecedor) => {
+          const li = document.createElement("li");
+          li.className = "list-group-item list-group-item-action";
+          li.textContent = fornecedor.nome;
+          li.dataset.fornecedorId = fornecedor.id;
+          li.dataset.fornecedorNome = fornecedor.nome;
+          li.addEventListener("click", function () {
+            selectedFornecedor = this.dataset.fornecedorNome;
+            fornecedoresList.querySelectorAll("li").forEach((item) => item.classList.remove("active"));
+            this.classList.add("active");
+           
+          });
+          fornecedoresList.appendChild(li);
+        });
+      })
+      .catch((error) => console.error("Erro ao carregar fornecedores:", error));
   }
 
   inputBusca.addEventListener("keyup", function () {
     const termoPesquisa = inputBusca.value;
+
     if (termoPesquisa.length < 2) {
       resultadoContainer.innerHTML = "";
+    
       return;
     }
+  
     fetch(`/buscar-produto/?term=${termoPesquisa}`)
-      .then((response) => response.json())
+      .then((response) => {
+     
+        return response.json();
+      })
       .then((data) => {
+    
         resultadoContainer.innerHTML = "";
+        if (!data || data.length === 0) {
+          resultadoContainer.innerHTML = "<div class='text-muted p-2'>Nenhum produto encontrado.</div>";
+          return;
+        }
         data.forEach((produto) => {
           const link = document.createElement("a");
           link.href = "#";
           link.className = "list-group-item list-group-item-action";
           link.innerHTML = `
-                            <div class="d-flex align-items-center">
-                                <img src="${produto.imagem_url}" alt="${
-            produto.titulo
-          }" style="width: 50px; height: auto; margin-right: 10px;">
-                                <div>
-                                <div><strong>${produto.titulo}</strong></div>
-                                <div>${parseFloat(produto.preco).toLocaleString("pt-BR", {
-                                  style: "currency",
-                                  currency: "BRL",
-                                })}</div>
-                                </div>
-                            </div>
-                            `;
+            <div class="d-flex align-items-center">
+              <img src="${produto.imagem_url}" alt="${produto.titulo}" style="width: 50px; height: auto; margin-right: 10px;">
+              <div>
+                <div><strong>${produto.titulo}</strong></div>
+                <div>${parseFloat(produto.preco).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</div>
+              </div>
+            </div>
+          `;
           link.dataset.produtoId = produto.id;
           link.dataset.produtoTitulo = produto.titulo;
           link.dataset.produtoPreco = produto.preco;
           link.dataset.produtoImagem = produto.imagem_url;
-          link.dataset.produtoFornecedor = produto.fornecedor;
           link.addEventListener("click", function (e) {
             e.preventDefault();
             inputBusca.value = this.dataset.produtoTitulo;
             inputBusca.dataset.produtoId = this.dataset.produtoId;
             inputBusca.dataset.produtoPreco = this.dataset.produtoPreco;
             inputBusca.dataset.produtoImagem = this.dataset.produtoImagem;
-            inputBusca.dataset.produtoFornecedor = this.dataset.produtoFornecedor;
-            inputBusca.dataset.produtoTitulo = this.dataset.produtoTitulo;
-
+            selectedFornecedor = null;
+            $('#fornecedorModal').modal('show');
+            carregarFornecedores(this.dataset.produtoId);
             resultadoContainer.innerHTML = "";
           });
           resultadoContainer.appendChild(link);
         });
+      })
+      .catch((error) => {
+        console.error("Erro na requisição:", error);
+        resultadoContainer.innerHTML = "<div class='text-danger p-2'>Erro ao carregar produtos.</div>";
       });
   });
 
   botaoMostrarTodos.addEventListener("click", function () {
-  resultadoContainer.innerHTML = "";
-
-  fetch(`/buscar-produto/?term=`)
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.length === 0) {
-        resultadoContainer.innerHTML = "<div class='text-muted p-2'>Nenhum produto encontrado.</div>";
-        return;
-      }
-
-      data.forEach((produto) => {
-        const link = document.createElement("a");
-        link.href = "#";
-        link.className = "list-group-item list-group-item-action";
-        link.innerHTML = `
-          <div class="d-flex align-items-center">
+    resultadoContainer.innerHTML = "";
+    fetch(`/buscar-produto/?term=`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.length === 0) {
+          resultadoContainer.innerHTML = "<div class='text-muted p-2'>Nenhum produto encontrado.</div>";
+          return;
+        }
+        data.forEach((produto) => {
+          const link = document.createElement("a");
+          link.href = "#";
+          link.className = "list-group-item list-group-item-action";
+          link.innerHTML = `
+            <div class="d-flex align-items-center">
               <img src="${produto.imagem_url}" alt="${produto.titulo}" style="width: 50px; height: auto; margin-right: 10px;">
               <div>
-                  <div><strong>${produto.titulo}</strong></div>
-                  <div>${parseFloat(produto.preco).toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}</div>
+                <div><strong>${produto.titulo}</strong></div>
+                <div>${parseFloat(produto.preco).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</div>
               </div>
-          </div>
-        `;
-        link.dataset.produtoId = produto.id;
-        link.dataset.produtoTitulo = produto.titulo;
-        link.dataset.produtoPreco = produto.preco;
-        link.dataset.produtoImagem = produto.imagem_url;
-        link.dataset.produtoFornecedor = produto.fornecedor;
-        link.addEventListener("click", function (e) {
-          e.preventDefault();
-          inputBusca.value = this.dataset.produtoTitulo;
-          inputBusca.dataset.produtoId = this.dataset.produtoId;
-          inputBusca.dataset.produtoPreco = this.dataset.produtoPreco;
-          inputBusca.dataset.produtoImagem = this.dataset.produtoImagem;
-          inputBusca.dataset.produtoFornecedor = this.dataset.produtoFornecedor;
-
-          resultadoContainer.innerHTML = "";
+            </div>
+          `;
+          link.dataset.produtoId = produto.id;
+          link.dataset.produtoTitulo = produto.titulo;
+          link.dataset.produtoPreco = produto.preco;
+          link.dataset.produtoImagem = produto.imagem_url;
+          link.addEventListener("click", function (e) {
+            e.preventDefault();
+            inputBusca.value = this.dataset.produtoTitulo;
+            inputBusca.dataset.produtoId = this.dataset.produtoId;
+            inputBusca.dataset.produtoPreco = this.dataset.produtoPreco;
+            inputBusca.dataset.produtoImagem = this.dataset.produtoImagem;
+            selectedFornecedor = null;
+            $('#fornecedorModal').modal('show');
+            carregarFornecedores(this.dataset.produtoId);
+            resultadoContainer.innerHTML = "";
+          });
+          resultadoContainer.appendChild(link);
         });
-        resultadoContainer.appendChild(link);
+      })
+      .catch((error) => {
+        resultadoContainer.innerHTML = "<div class='text-danger p-2'>Erro ao carregar produtos.</div>";
+        console.error(error);
       });
-    })
-    .catch((error) => {
-      resultadoContainer.innerHTML = "<div class='text-danger p-2'>Erro ao carregar produtos.</div>";
-      console.error(error);
-    });
-});
-
-  botaoAdicionar.addEventListener("click", function (event) {
-    event.preventDefault();
-    const produtoId = inputBusca.dataset.produtoId;
-    const titulo = inputBusca.dataset.produtoTitulo
-    const preco = parseFloat(inputBusca.dataset.produtoPreco);
-    const quantidade = parseInt(inputQuantidade.value);
-    const fornecedor = inputBusca.dataset.produtoFornecedor;
-
-    if (!produtoId || isNaN(preco) || isNaN(quantidade) || quantidade <= 0) {
-      alert("Selecione um produto válido e informe a quantidade.");
-      return;
-    }
-
-    const imagemUrl = inputBusca.dataset.produtoImagem;
-    const itemId = `${produtoId}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    const produto = { uid: itemId, id: produtoId, titulo, preco, quantidade, imagem_url: imagemUrl, fornecedor };
-    produtosAdicionados.push(produto);
-
-    adicionarLinhaNaTabela(produto);
-    atualizarVisibilidadeLista();
-    limparCamposProduto();
-    atualizarResumoVenda();
   });
+
+  document.getElementById("confirmar-fornecedor").addEventListener("click", function () {
+    if (selectedFornecedor) {
+      $('#fornecedorModal').modal('hide');
+
+    } else {
+      alert("Por favor, selecione um fornecedor.");
+ 
+    }
+  });
+
+botaoAdicionar.addEventListener("click", function (event) {
+  event.preventDefault();
+  const produtoId = inputBusca.dataset.produtoId;
+  const titulo = inputBusca.dataset.produtoTitulo || inputBusca.value.trim(); 
+  const preco = parseFloat(inputBusca.dataset.produtoPreco);
+  const quantidade = parseInt(inputQuantidade.value);
+
+
+
+  if (!produtoId || isNaN(preco) || isNaN(quantidade) || quantidade <= 0) {
+    alert("Selecione um produto válido e informe a quantidade.");
+    return;
+  }
+
+  if (!selectedFornecedor) {
+    alert("Por favor, selecione um fornecedor.");
+    $('#fornecedorModal').modal('show');
+    return;
+  }
+
+  const imagemUrl = inputBusca.dataset.produtoImagem;
+  const itemId = `${produtoId}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  const produto = {
+    uid: itemId,
+    id: produtoId,
+    titulo: titulo,
+    preco: preco,
+    quantidade: quantidade,
+    imagem_url: imagemUrl,
+    fornecedor: selectedFornecedor || "Não especificado"
+  };
+
+
+  produtosAdicionados.push(produto);
+
+  adicionarLinhaNaTabela(produto);
+  atualizarVisibilidadeLista();
+  limparCamposProduto();
+  atualizarResumoVenda();
+  $('#fornecedorModal').modal('hide');
+
+});
 
   cepInput.addEventListener("blur", function () {
     const cep = cepInput.value.replace(/\D/g, "");
-
     if (cep.length === 8) {
       ruaInput.value = "...";
       bairroInput.value = "...";
       cidadeInput.value = "...";
       estadoInput.value = "...";
-
       fetch(`https://viacep.com.br/ws/${cep}/json/`)
         .then((response) => response.json())
-
         .then((data) => {
           if (data.erro) {
             alert("CEP não encontrado. Por favor, verifique.");
@@ -433,37 +509,30 @@
             estadoInput.value = data.uf;
           }
         })
-
         .catch((error) => {
           console.error("Erro ao buscar o CEP:", error);
-
           alert("Não foi possível consultar o CEP. Verifique sua conexão.");
         });
     }
   });
 
-  atualizarVisibilidadeLista();
-
   const formVenda = document.getElementById("form-venda");
-
-formVenda.addEventListener("submit", function (event) {
-    
+  formVenda.addEventListener("submit", function (event) {
     event.preventDefault();
-
-    formVenda.classList.remove('was-validated');
-    formVenda.classList.add('was-validated');
-   
+    formVenda.classList.remove("was-validated");
+    formVenda.classList.add("was-validated");
     if (!formVenda.checkValidity() || produtosAdicionados.length === 0) {
-        if (produtosAdicionados.length === 0) {
-            alert("Adicione pelo menos um produto à venda antes de finalizar.");
-        }
-
-        return;
+      if (produtosAdicionados.length === 0) {
+        alert("Adicione pelo menos um produto à venda antes de finalizar.");
+      }
+      return;
     }
-  
     document.getElementById("produtos-json-input").value = JSON.stringify(produtosAdicionados);
-    
     formVenda.submit();
+  
+  });
+
+  atualizarVisibilidadeLista();
 });
 </script>
 {% endblock %}
